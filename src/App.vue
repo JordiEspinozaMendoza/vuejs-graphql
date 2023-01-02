@@ -1,25 +1,11 @@
 <script>
-import gql from "graphql-tag";
+import "./styles.sass";
 import { useQuery } from "@vue/apollo-composable";
-
-const POSTS_QUERY = gql`
-  query getAllPosts {
-    getAllPosts {
-      id
-      title
-      content
-      author {
-        id
-        name
-      }
-    }
-  }
-`;
-
+import { ALL_POSTS_QUERY } from "./queries/getAllPosts";
 export default {
   name: "App",
   data() {
-    const { result, loading, error } = useQuery(POSTS_QUERY);
+    const { result, loading, error } = useQuery(ALL_POSTS_QUERY);
     return {
       result,
       loading,
@@ -31,13 +17,13 @@ export default {
 
 <template>
   <div id="app">
-    <h1>Posts</h1>
+    <h1>All posts list</h1>
     <div v-if="loading">Loading...</div>
     <div v-if="error">Error: {{ error }}</div>
     <div v-if="result">
       <div v-for="post in result.getAllPosts" :key="post.id">
         <h2>{{ post.title }}</h2>
-        <p>{{ post.content }}</p>
+        <p>{{ post.content || "No content" }}</p>
         <p>Author: {{ post.author.name }}</p>
       </div>
     </div>
