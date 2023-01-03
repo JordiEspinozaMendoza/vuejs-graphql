@@ -12,6 +12,11 @@ const router = createRouter({
       name: "register",
       component: () => import("./views/register"),
     },
+    {
+      path: "/login",
+      name: "login",
+      component: () => import("./views/login"),
+    },
   ],
 });
 export default router;
