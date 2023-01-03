@@ -4,12 +4,14 @@ import "./styles.sass";
 import { useMutation } from "@vue/apollo-composable";
 import gql from "graphql-tag";
 import { ref } from "vue";
+import { logErrorMessages } from "@vue/apollo-util";
 
 export default {
   setup() {
     // Form refs
     const email = ref("");
     const password = ref("");
+    const error = ref({ isError: false, message: "" });
     // Mutation to login
     const LOGIN_QUERY = gql`
       mutation login($email: String!, $password: String!) {
@@ -25,6 +27,7 @@ export default {
       mutate: login,
       onDone: onLoginDone,
       onError: onLoginError,
+      loading: loginLoading,
     } = useMutation(LOGIN_QUERY, () => ({
       variables: {
         email: email.value,
@@ -33,16 +36,23 @@ export default {
     }));
     // On login done
     onLoginDone((data) => {
-      console.log(data);
+      localStorage.setItem("userInfo", JSON.stringify(data.login));
+      window.location.href = "/";
     });
     // On login error
-    onLoginError((error) => {
-      console.log(error);
+    onLoginError((e) => {
+      logErrorMessages(e);
+      error.value = {
+        isError: true,
+        message: e.message,
+      };
     });
     return {
       email,
       password,
       login,
+      error,
+      loginLoading,
     };
   },
   methods: {},
@@ -65,6 +75,7 @@ export default {
           id="email"
           placeholder="Insert your email"
           v-model="email"
+          :disabled="loginLoading"
         />
         <label for="password">Password</label>
         <input
@@ -72,9 +83,18 @@ export default {
           id="password"
           placeholder="Insert your password"
           v-model="password"
+          :disabled="loginLoading"
         />
-        <button type="submit" class="primary__button" @click.prevent="login">
-          Login
+        <div v-if="error.isError && !loginLoading" class="error__message">
+          <p>{{ error.message }}</p>
+        </div>
+        <button
+          type="submit"
+          class="primary__button"
+          @click.prevent="login"
+          :disabled="loginLoading"
+        >
+          {{ loginLoading ? "Loading..." : "Login" }}
         </button>
       </form>
     </div>
